@@ -1,27 +1,27 @@
-#container {
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.loading {
   text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  color: #666;
+  font-style: italic;
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.success {
+  color: #28a745;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+.error {
+  color: #dc3545;
 }
 
-#container a {
-  text-decoration: none;
+pre {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 12px;
 }

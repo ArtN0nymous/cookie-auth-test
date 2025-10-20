@@ -1,0 +1,39 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Login</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="container">
+    <h2>Iniciar Sesión</h2>
+    
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input 
+        [(ngModel)]="email" 
+        type="email" 
+        placeholder="Ingresa tu email"
+        [disabled]="isLoading">
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Contraseña</ion-label>
+      <ion-input 
+        [(ngModel)]="password" 
+        type="password" 
+        placeholder="Ingresa tu contraseña"
+        [disabled]="isLoading">
+      </ion-input>
+    </ion-item>
+
+    <ion-button 
+      (click)="login()" 
+      expand="block" 
+      [disabled]="isLoading"
+      style="margin-top: 20px;">
+      {{ isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+    </ion-button>
+  </div>
+</ion-content>
