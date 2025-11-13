@@ -49,13 +49,14 @@ export class HomePage implements OnInit {
       const response: any = await firstValueFrom(this.http.get(`${environment.apiUrl}/user/profile`));
       console.log('Auth check response:', response);
       this.authStatus = 'Autenticado correctamente';
-      this.userInfo = response.data;
+      const userData = response.user || response.data || response;
+      this.userInfo = userData;
       
       // Guardar los datos del usuario en el storage
-      if (response.data) {
+      if (userData && userData.id) {
         const completeUserData = {
-          user: response.data,
-          message: 'Profile loaded successfully'
+          user: userData,
+          message: response.message || 'Profile loaded successfully'
         };
         await this.authService.setUserData(completeUserData);
       }

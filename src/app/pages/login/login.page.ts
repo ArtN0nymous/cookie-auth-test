@@ -46,12 +46,7 @@ export class LoginPage implements OnInit {
 
       // Guardar información del usuario usando el AuthService
       const completeUserData: CompleteUserData = {
-        user: {
-          id: response.data?.id || response.id,
-          name: response.data?.name || response.name,
-          email: response.data?.email || response.email,
-          ...response.data || response
-        },
+        user: response.user || response.data?.user || response.data || response,
         message: response.message || 'Login successful'
       };
       
