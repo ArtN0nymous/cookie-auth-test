@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">cookie-auth-test</string>
+    <string name="title_activity_main">cookie-auth-test</string>
+    <string name="package_name">cookie.auth.test</string>
+    <string name="custom_url_scheme">cookie.auth.test</string>
+</resources>
