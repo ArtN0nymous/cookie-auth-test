@@ -7,7 +7,7 @@ import { AppComponent } from './app/app.component';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { environment } from './environments/environment.prod';
-import { CapacitorCookies } from '@capacitor/core';
+import { CapacitorCookies, Capacitor } from '@capacitor/core';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { IonicStorageModule } from '@ionic/storage-angular';
@@ -60,22 +60,72 @@ bootstrapApplication(AppComponent, {
 
             // Agregar X-CSRF-TOKEN para métodos que lo requieren
             if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+              // Detectar si estamos en web o en plataforma nativa
+              const isNative = Capacitor.isNativePlatform();
+              const platform = Capacitor.getPlatform();
+              const isWeb = !isNative && platform === 'web';
+              
               // Usar from() para convertir Promise a Observable
               return from(getCsrfTokenFromCookie()).pipe(
                 switchMap(csrfToken => {
                   if (csrfToken) {
-                    headers['X-XSRF-TOKEN'] = csrfToken;
-                    console.log('CSRF Token agregado:', csrfToken);
+                    if (isWeb) {
+                      let body = req.body;
+                      
+                      // Si el body es null o undefined, crear un objeto
+                      if (body === null || body === undefined) {
+                        body = { _token: csrfToken };
+                      } 
+                      // Si el body es un objeto (y no es FormData), agregar la propiedad
+                      else if (body instanceof Object && !(body instanceof FormData)) {
+                        body = { ...body, _token: csrfToken };
+                      }
+                      // Si es FormData, agregar como campo
+                      else if (body instanceof FormData) {
+                        body.append('_token', csrfToken);
+                      }
+                      // Si es string, intentar parsearlo como JSON
+                      else if (typeof body === 'string') {
+                        try {
+                          const parsed = JSON.parse(body);
+                          body = JSON.stringify({ ...parsed, _token: csrfToken });
+                        } catch {
+                          // Si no es JSON válido, crear un nuevo objeto
+                          body = { _token: csrfToken };
+                        }
+                      }
+                      
+                      console.log('✅ _token agregado al body:', { _token: csrfToken });
+                      
+                      const modifiedReq = req.clone({
+                        headers: new HttpHeaders(headers),
+                        body: body,
+                        withCredentials: true
+                      });
+
+                      return next(modifiedReq);
+                    } else {
+                      // En plataformas nativas (iOS/Android): agregar header X-XSRF-TOKEN
+                      headers['X-XSRF-TOKEN'] = csrfToken;
+                      console.log('CSRF Token agregado al header:', csrfToken);
+                      
+                      const modifiedReq = req.clone({
+                        headers: new HttpHeaders(headers),
+                        withCredentials: true
+                      });
+
+                      return next(modifiedReq);
+                    }
                   } else {
-                    console.warn('CSRF Token no encontrado en cookies');
+                    console.warn('⚠️ CSRF Token no encontrado en cookies');
+                    
+                    const modifiedReq = req.clone({
+                      headers: new HttpHeaders(headers),
+                      withCredentials: true
+                    });
+
+                    return next(modifiedReq);
                   }
-
-                  const modifiedReq = req.clone({
-                    headers: new HttpHeaders(headers),
-                    withCredentials: true
-                  });
-
-                  return next(modifiedReq);
                 })
               );
             }
